@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+option go_package = "github.com/hsmtkk/supreme-parakeet/proto";
+
+package proto;
+
+service BookingService {
+  rpc NewUser (NewUserRequest) returns (NewUserResponse){}
+  rpc GetUser (GetUserRequest) returns (GetUserResponse){}
+  rpc NewRoom (NewRoomRequest) returns (NewRoomResponse){}
+  rpc GetRoom (GetRoomRequest) returns (GetRoomResponse){}
+  rpc NewBooking (NewBookingRequest) returns (NewBookingResponse){}
+  rpc GetBooking (GetBookingRequest) returns (GetBookingResponse){}
+}
+
+message NewUser {
+  string name = 1;
+}
+
+message User {
+  int64 id = 1;
+  string name = 2;
+}
+
+message NewUserRequest {
+  NewUser user = 1;
+}
+
+message NewUserResponse {
+  User user = 1;
+}
+
+message GetUserRequest {
+  int64 id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message NewRoom {
+  string name = 1;
+  int64 capacity = 2;
+}
+
+message Room {
+  int64 id = 1;
+  string name = 2;
+  int64 capacity = 3;
+}
+
+message NewRoomRequest {
+  NewRoom room = 1;
+}
+
+message NewRoomResponse {
+  Room room = 1;
+}
+
+message GetRoomRequest {
+  int64 id = 1;
+}
+
+message GetRoomResponse {
+  Room room = 1;
+}
+
+message NewBooking {
+  int64 user_id = 1;
+  int64 room_id = 2;
+  int64 reserved_num = 3;
+  string begin_date_time = 4;
+  string end_date_time = 5;
+}
+
+message Booking {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 room_id = 3;
+  int64 reserved_num = 4;
+  string begin_date_time = 5;
+  string end_date_time = 6;
+}
+
+message NewBookingRequest {
+  NewBooking booking = 1;
+}
+
+message NewBookingResponse {
+  Booking booking = 1;
+}
+
+message GetBookingRequest {
+  int64 id = 1;
+}
+
+message GetBookingResponse {
+  Booking booking = 1;
+}
