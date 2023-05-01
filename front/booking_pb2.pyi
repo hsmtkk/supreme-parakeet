@@ -1,6 +1,7 @@
+from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
-from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Optional, Union as _Union
+from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
@@ -44,6 +45,16 @@ class GetRoomResponse(_message.Message):
     room: Room
     def __init__(self, room: _Optional[_Union[Room, _Mapping]] = ...) -> None: ...
 
+class GetRoomsRequest(_message.Message):
+    __slots__ = []
+    def __init__(self) -> None: ...
+
+class GetRoomsResponse(_message.Message):
+    __slots__ = ["rooms"]
+    ROOMS_FIELD_NUMBER: _ClassVar[int]
+    rooms: _containers.RepeatedCompositeFieldContainer[Room]
+    def __init__(self, rooms: _Optional[_Iterable[_Union[Room, _Mapping]]] = ...) -> None: ...
+
 class GetUserRequest(_message.Message):
     __slots__ = ["id"]
     ID_FIELD_NUMBER: _ClassVar[int]
@@ -55,6 +66,16 @@ class GetUserResponse(_message.Message):
     USER_FIELD_NUMBER: _ClassVar[int]
     user: User
     def __init__(self, user: _Optional[_Union[User, _Mapping]] = ...) -> None: ...
+
+class GetUsersRequest(_message.Message):
+    __slots__ = []
+    def __init__(self) -> None: ...
+
+class GetUsersResponse(_message.Message):
+    __slots__ = ["users"]
+    USERS_FIELD_NUMBER: _ClassVar[int]
+    users: _containers.RepeatedCompositeFieldContainer[User]
+    def __init__(self, users: _Optional[_Iterable[_Union[User, _Mapping]]] = ...) -> None: ...
 
 class NewBooking(_message.Message):
     __slots__ = ["begin_date_time", "end_date_time", "reserved_num", "room_id", "user_id"]

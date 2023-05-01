@@ -7,8 +7,10 @@ package proto;
 service BookingService {
   rpc NewUser (NewUserRequest) returns (NewUserResponse){}
   rpc GetUser (GetUserRequest) returns (GetUserResponse){}
+  rpc GetUsers (GetUsersRequest) returns (GetUsersResponse){}
   rpc NewRoom (NewRoomRequest) returns (NewRoomResponse){}
   rpc GetRoom (GetRoomRequest) returns (GetRoomResponse){}
+  rpc GetRooms (GetRoomsRequest) returns (GetRoomsResponse){}
   rpc NewBooking (NewBookingRequest) returns (NewBookingResponse){}
   rpc GetBooking (GetBookingRequest) returns (GetBookingResponse){}
 }
@@ -38,6 +40,13 @@ message GetUserResponse {
   User user = 1;
 }
 
+message GetUsersRequest {
+}
+
+message GetUsersResponse {
+  repeated User users = 1;
+}
+
 message NewRoom {
   string name = 1;
   int64 capacity = 2;
@@ -63,6 +72,13 @@ message GetRoomRequest {
 
 message GetRoomResponse {
   Room room = 1;
+}
+
+message GetRoomsRequest {
+}
+
+message GetRoomsResponse {
+  repeated Room rooms = 1;
 }
 
 message NewBooking {

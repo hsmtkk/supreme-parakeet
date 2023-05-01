@@ -8,6 +8,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/hsmtkk/supreme-parakeet/back/model"
+	"google.golang.org/api/iterator"
 )
 
 const userCollection = "user"
@@ -15,6 +16,7 @@ const userCollection = "user"
 type UserRepo interface {
 	New(context.Context, model.NewUser) (model.User, error)
 	Get(context.Context, int64) (model.User, error)
+	List(context.Context) ([]model.User, error)
 }
 
 func NewUserRepo(client *firestore.Client) UserRepo {
@@ -47,4 +49,23 @@ func (r *userRepoImpl) Get(ctx context.Context, id int64) (model.User, error) {
 		return result, fmt.Errorf("failed to decode data: %w", err)
 	}
 	return result, nil
+}
+
+func (r *userRepoImpl) List(ctx context.Context) ([]model.User, error) {
+	users := []model.User{}
+	iter := r.client.Collection(userCollection).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+		user := model.User{}
+		if err := doc.DataTo(&user); err != nil {
+			return nil, fmt.Errorf("failed to decode data: %w", err)
+		}
+		users = append(users, user)
+	}
+	return users, nil
 }

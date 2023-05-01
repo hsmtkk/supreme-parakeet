@@ -43,6 +43,18 @@ func (s *service) GetUser(ctx context.Context, in *proto.GetUserRequest) (*proto
 	return &proto.GetUserResponse{User: &proto.User{Id: user.ID, Name: user.Name}}, nil
 }
 
+func (s *service) GetUsers(ctx context.Context, in *proto.GetUsersRequest) (*proto.GetUsersResponse, error) {
+	users, err := s.userRepo.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	results := []*proto.User{}
+	for _, u := range users {
+		results = append(results, &proto.User{Id: u.ID, Name: u.Name})
+	}
+	return &proto.GetUsersResponse{Users: results}, nil
+}
+
 func (s *service) NewRoom(ctx context.Context, in *proto.NewRoomRequest) (*proto.NewRoomResponse, error) {
 	newRoom := model.NewRoom{Name: in.GetRoom().GetName(), Capacity: in.GetRoom().GetCapacity()}
 	room, err := s.roomRepo.New(ctx, newRoom)
@@ -58,6 +70,18 @@ func (s *service) GetRoom(ctx context.Context, in *proto.GetRoomRequest) (*proto
 		return nil, err
 	}
 	return &proto.GetRoomResponse{Room: &proto.Room{Id: room.ID, Name: room.Name, Capacity: room.Capacity}}, nil
+}
+
+func (s *service) GetRooms(ctx context.Context, in *proto.GetRoomsRequest) (*proto.GetRoomsResponse, error) {
+	rooms, err := s.roomRepo.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	results := []*proto.Room{}
+	for _, r := range rooms {
+		results = append(results, &proto.Room{Id: r.ID, Name: r.Name, Capacity: r.Capacity})
+	}
+	return &proto.GetRoomsResponse{Rooms: results}, nil
 }
 
 func (s *service) NewBooking(ctx context.Context, in *proto.NewBookingRequest) (*proto.NewBookingResponse, error) {

@@ -24,8 +24,10 @@ const _ = grpc.SupportPackageIsVersion7
 type BookingServiceClient interface {
 	NewUser(ctx context.Context, in *NewUserRequest, opts ...grpc.CallOption) (*NewUserResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+	GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error)
 	NewRoom(ctx context.Context, in *NewRoomRequest, opts ...grpc.CallOption) (*NewRoomResponse, error)
 	GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*GetRoomResponse, error)
+	GetRooms(ctx context.Context, in *GetRoomsRequest, opts ...grpc.CallOption) (*GetRoomsResponse, error)
 	NewBooking(ctx context.Context, in *NewBookingRequest, opts ...grpc.CallOption) (*NewBookingResponse, error)
 	GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*GetBookingResponse, error)
 }
@@ -56,6 +58,15 @@ func (c *bookingServiceClient) GetUser(ctx context.Context, in *GetUserRequest, 
 	return out, nil
 }
 
+func (c *bookingServiceClient) GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error) {
+	out := new(GetUsersResponse)
+	err := c.cc.Invoke(ctx, "/proto.BookingService/GetUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *bookingServiceClient) NewRoom(ctx context.Context, in *NewRoomRequest, opts ...grpc.CallOption) (*NewRoomResponse, error) {
 	out := new(NewRoomResponse)
 	err := c.cc.Invoke(ctx, "/proto.BookingService/NewRoom", in, out, opts...)
@@ -68,6 +79,15 @@ func (c *bookingServiceClient) NewRoom(ctx context.Context, in *NewRoomRequest, 
 func (c *bookingServiceClient) GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*GetRoomResponse, error) {
 	out := new(GetRoomResponse)
 	err := c.cc.Invoke(ctx, "/proto.BookingService/GetRoom", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bookingServiceClient) GetRooms(ctx context.Context, in *GetRoomsRequest, opts ...grpc.CallOption) (*GetRoomsResponse, error) {
+	out := new(GetRoomsResponse)
+	err := c.cc.Invoke(ctx, "/proto.BookingService/GetRooms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +118,10 @@ func (c *bookingServiceClient) GetBooking(ctx context.Context, in *GetBookingReq
 type BookingServiceServer interface {
 	NewUser(context.Context, *NewUserRequest) (*NewUserResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
+	GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error)
 	NewRoom(context.Context, *NewRoomRequest) (*NewRoomResponse, error)
 	GetRoom(context.Context, *GetRoomRequest) (*GetRoomResponse, error)
+	GetRooms(context.Context, *GetRoomsRequest) (*GetRoomsResponse, error)
 	NewBooking(context.Context, *NewBookingRequest) (*NewBookingResponse, error)
 	GetBooking(context.Context, *GetBookingRequest) (*GetBookingResponse, error)
 	mustEmbedUnimplementedBookingServiceServer()
@@ -115,11 +137,17 @@ func (UnimplementedBookingServiceServer) NewUser(context.Context, *NewUserReques
 func (UnimplementedBookingServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
+func (UnimplementedBookingServiceServer) GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUsers not implemented")
+}
 func (UnimplementedBookingServiceServer) NewRoom(context.Context, *NewRoomRequest) (*NewRoomResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewRoom not implemented")
 }
 func (UnimplementedBookingServiceServer) GetRoom(context.Context, *GetRoomRequest) (*GetRoomResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoom not implemented")
+}
+func (UnimplementedBookingServiceServer) GetRooms(context.Context, *GetRoomsRequest) (*GetRoomsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRooms not implemented")
 }
 func (UnimplementedBookingServiceServer) NewBooking(context.Context, *NewBookingRequest) (*NewBookingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewBooking not implemented")
@@ -176,6 +204,24 @@ func _BookingService_GetUser_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BookingService_GetUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BookingServiceServer).GetUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.BookingService/GetUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BookingServiceServer).GetUsers(ctx, req.(*GetUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BookingService_NewRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(NewRoomRequest)
 	if err := dec(in); err != nil {
@@ -208,6 +254,24 @@ func _BookingService_GetRoom_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BookingServiceServer).GetRoom(ctx, req.(*GetRoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BookingService_GetRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRoomsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BookingServiceServer).GetRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.BookingService/GetRooms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BookingServiceServer).GetRooms(ctx, req.(*GetRoomsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -264,12 +328,20 @@ var BookingService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BookingService_GetUser_Handler,
 		},
 		{
+			MethodName: "GetUsers",
+			Handler:    _BookingService_GetUsers_Handler,
+		},
+		{
 			MethodName: "NewRoom",
 			Handler:    _BookingService_NewRoom_Handler,
 		},
 		{
 			MethodName: "GetRoom",
 			Handler:    _BookingService_GetRoom_Handler,
+		},
+		{
+			MethodName: "GetRooms",
+			Handler:    _BookingService_GetRooms_Handler,
 		},
 		{
 			MethodName: "NewBooking",

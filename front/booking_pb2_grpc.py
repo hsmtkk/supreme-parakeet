@@ -24,6 +24,11 @@ class BookingServiceStub(object):
                 request_serializer=booking__pb2.GetUserRequest.SerializeToString,
                 response_deserializer=booking__pb2.GetUserResponse.FromString,
                 )
+        self.GetUsers = channel.unary_unary(
+                '/proto.BookingService/GetUsers',
+                request_serializer=booking__pb2.GetUsersRequest.SerializeToString,
+                response_deserializer=booking__pb2.GetUsersResponse.FromString,
+                )
         self.NewRoom = channel.unary_unary(
                 '/proto.BookingService/NewRoom',
                 request_serializer=booking__pb2.NewRoomRequest.SerializeToString,
@@ -33,6 +38,11 @@ class BookingServiceStub(object):
                 '/proto.BookingService/GetRoom',
                 request_serializer=booking__pb2.GetRoomRequest.SerializeToString,
                 response_deserializer=booking__pb2.GetRoomResponse.FromString,
+                )
+        self.GetRooms = channel.unary_unary(
+                '/proto.BookingService/GetRooms',
+                request_serializer=booking__pb2.GetRoomsRequest.SerializeToString,
+                response_deserializer=booking__pb2.GetRoomsResponse.FromString,
                 )
         self.NewBooking = channel.unary_unary(
                 '/proto.BookingService/NewBooking',
@@ -61,6 +71,12 @@ class BookingServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetUsers(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def NewRoom(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -68,6 +84,12 @@ class BookingServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetRoom(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetRooms(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -98,6 +120,11 @@ def add_BookingServiceServicer_to_server(servicer, server):
                     request_deserializer=booking__pb2.GetUserRequest.FromString,
                     response_serializer=booking__pb2.GetUserResponse.SerializeToString,
             ),
+            'GetUsers': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetUsers,
+                    request_deserializer=booking__pb2.GetUsersRequest.FromString,
+                    response_serializer=booking__pb2.GetUsersResponse.SerializeToString,
+            ),
             'NewRoom': grpc.unary_unary_rpc_method_handler(
                     servicer.NewRoom,
                     request_deserializer=booking__pb2.NewRoomRequest.FromString,
@@ -107,6 +134,11 @@ def add_BookingServiceServicer_to_server(servicer, server):
                     servicer.GetRoom,
                     request_deserializer=booking__pb2.GetRoomRequest.FromString,
                     response_serializer=booking__pb2.GetRoomResponse.SerializeToString,
+            ),
+            'GetRooms': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRooms,
+                    request_deserializer=booking__pb2.GetRoomsRequest.FromString,
+                    response_serializer=booking__pb2.GetRoomsResponse.SerializeToString,
             ),
             'NewBooking': grpc.unary_unary_rpc_method_handler(
                     servicer.NewBooking,
@@ -163,6 +195,23 @@ class BookingService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
+    def GetUsers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/proto.BookingService/GetUsers',
+            booking__pb2.GetUsersRequest.SerializeToString,
+            booking__pb2.GetUsersResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def NewRoom(request,
             target,
             options=(),
@@ -193,6 +242,23 @@ class BookingService(object):
         return grpc.experimental.unary_unary(request, target, '/proto.BookingService/GetRoom',
             booking__pb2.GetRoomRequest.SerializeToString,
             booking__pb2.GetRoomResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetRooms(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/proto.BookingService/GetRooms',
+            booking__pb2.GetRoomsRequest.SerializeToString,
+            booking__pb2.GetRoomsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
