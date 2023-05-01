@@ -22,11 +22,27 @@ def run() -> None:
     page_map[page](back_address)
 
 
-def get_users(back_address: str) -> typing.List[booking_pb2.User]:
+def new_room(back_address: str, name: str, capacity: int) -> booking_pb2.Room:
     with grpc.insecure_channel(back_address) as channel:
         stub = booking_pb2_grpc.BookingServiceStub(channel)
-        response = stub.GetUsers(booking_pb2.GetUsersRequest())
-    return response.users
+        response = stub.NewRoom(
+            booking_pb2.NewRoomRequest(
+                room=booking_pb2.NewRoom(
+                    name=name,
+                    capacity=capacity,
+                )
+            )
+        )
+    return response.room
+
+
+def new_user(back_address: str, name: str) -> booking_pb2.User:
+    with grpc.insecure_channel(back_address) as channel:
+        stub = booking_pb2_grpc.BookingServiceStub(channel)
+        response = stub.NewUser(
+            booking_pb2.NewUserRequest(user=booking_pb2.NewUser(name=name))
+        )
+    return response.user
 
 
 def get_rooms(back_address: str) -> typing.List[booking_pb2.Room]:
@@ -34,6 +50,13 @@ def get_rooms(back_address: str) -> typing.List[booking_pb2.Room]:
         stub = booking_pb2_grpc.BookingServiceStub(channel)
         response = stub.GetRooms(booking_pb2.GetRoomsRequest())
     return response.rooms
+
+
+def get_users(back_address: str) -> typing.List[booking_pb2.User]:
+    with grpc.insecure_channel(back_address) as channel:
+        stub = booking_pb2_grpc.BookingServiceStub(channel)
+        response = stub.GetUsers(booking_pb2.GetUsersRequest())
+    return response.users
 
 
 def show_booking(back_address: str) -> None:
@@ -99,17 +122,8 @@ def show_room(back_address: str) -> None:
         submit_button = st.form_submit_button(label="送信")
 
     if submit_button:
-        with grpc.insecure_channel(back_address) as channel:
-            stub = booking_pb2_grpc.BookingServiceStub(channel)
-            response = stub.NewRoom(
-                booking_pb2.NewRoomRequest(
-                    room=booking_pb2.NewRoom(
-                        name=name,
-                        capacity=capacity,
-                    )
-                )
-            )
-        st.write(response)
+        room = new_room(back_address, name, capacity)
+        st.write(room)
 
 
 def show_user(back_address: str) -> None:
@@ -120,12 +134,8 @@ def show_user(back_address: str) -> None:
         submit_button = st.form_submit_button(label="送信")
 
     if submit_button:
-        with grpc.insecure_channel(back_address) as channel:
-            stub = booking_pb2_grpc.BookingServiceStub(channel)
-            response = stub.NewUser(
-                booking_pb2.NewUserRequest(user=booking_pb2.NewUser(name=name))
-            )
-        st.write(response)
+        user = new_user(back_address, name)
+        st.write(user)
 
 
 run()
