@@ -1,0 +1,20 @@
+version: "3"
+services:
+  front:
+    build:
+      dockerfile: front/Dockerfile
+    environment:
+      PORT: 8000
+      BACK_HOST: back
+      BACK_PORT: 50051
+    ports:
+    - 8000:8000
+  back:
+    build:
+      dockerfile: back/Dockerfile
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/supreme-parakeet-ba68c514cbcf.json
+      PORT: 50051
+      PROJECT_ID: supreme-parakeet
+    volumes:
+    - supreme-parakeet-ba68c514cbcf.json:/app/supreme-parakeet-ba68c514cbcf.json:ro
