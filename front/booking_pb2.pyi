@@ -33,6 +33,16 @@ class GetBookingResponse(_message.Message):
     booking: Booking
     def __init__(self, booking: _Optional[_Union[Booking, _Mapping]] = ...) -> None: ...
 
+class GetBookingsRequest(_message.Message):
+    __slots__ = []
+    def __init__(self) -> None: ...
+
+class GetBookingsResponse(_message.Message):
+    __slots__ = ["bookings"]
+    BOOKINGS_FIELD_NUMBER: _ClassVar[int]
+    bookings: _containers.RepeatedCompositeFieldContainer[Booking]
+    def __init__(self, bookings: _Optional[_Iterable[_Union[Booking, _Mapping]]] = ...) -> None: ...
+
 class GetRoomRequest(_message.Message):
     __slots__ = ["id"]
     ID_FIELD_NUMBER: _ClassVar[int]

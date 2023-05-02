@@ -107,6 +107,18 @@ func (s *service) GetBooking(ctx context.Context, in *proto.GetBookingRequest) (
 	return &proto.GetBookingResponse{Booking: &proto.Booking{Id: booking.ID, UserId: booking.UserID, RoomId: booking.RoomID, ReservedNum: booking.ReservedNum, BeginDateTime: booking.BeginDateTime, EndDateTime: booking.EndDateTime}}, nil
 }
 
+func (s *service) GetBookings(ctx context.Context, in *proto.GetBookingsRequest) (*proto.GetBookingsResponse, error) {
+	bookings, err := s.bookingRepo.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+	results := []*proto.Booking{}
+	for _, b := range bookings {
+		results = append(results, &proto.Booking{Id: b.ID, UserId: b.UserID, RoomId: b.RoomID, ReservedNum: b.ReservedNum, BeginDateTime: b.BeginDateTime, EndDateTime: b.EndDateTime})
+	}
+	return &proto.GetBookingsResponse{Bookings: results}, nil
+}
+
 func main() {
 	portStr := os.Getenv("PORT")
 	if portStr == "" {

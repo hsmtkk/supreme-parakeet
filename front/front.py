@@ -47,7 +47,7 @@ def new_booking(
             )
         )
     return model.booking.Booking(
-        id=response.id,
+        id=response.booking.id,
         user_id=new_item.user_id,
         room_id=new_item.room_id,
         reserved_num=new_item.reserved_num,
@@ -68,7 +68,7 @@ def new_room(back_address: str, new_item: model.room.NewRoom) -> model.room.Room
             )
         )
     return model.room.Room(
-        id=response.id, name=new_item.name, capacity=new_item.capacity
+        id=response.room.id, name=new_item.name, capacity=new_item.capacity
     )
 
 
@@ -78,7 +78,7 @@ def new_user(back_address: str, new_item: model.user.NewUser) -> model.user.User
         response = stub.NewUser(
             booking_pb2.NewUserRequest(user=booking_pb2.NewUser(name=new_item.name))
         )
-    return model.user.User(id=response.id, name=new_item.name)
+    return model.user.User(id=response.user.id, name=new_item.name)
 
 
 def get_rooms(back_address: str) -> typing.List[model.room.Room]:
@@ -101,6 +101,25 @@ def get_users(back_address: str) -> typing.List[model.user.User]:
     return results
 
 
+def get_bookings(back_address: str) -> typing.List[model.booking.Booking]:
+    with grpc.insecure_channel(back_address) as channel:
+        stub = booking_pb2_grpc.BookingServiceStub(channel)
+        response = stub.GetBookings(booking_pb2.GetBookingsRequest())
+    results = []
+    for b in response.bookings:
+        results.append(
+            model.booking.Booking(
+                id=b.id,
+                user_id=b.user_id,
+                room_id=b.room_id,
+                reserved_num=b.reserved_num,
+                begin_date_time=b.begin_date_time,
+                end_date_time=b.end_date_time,
+            )
+        )
+    return results
+
+
 def show_booking(back_address: str) -> None:
     st.title("予約登録")
 
@@ -113,11 +132,16 @@ def show_booking(back_address: str) -> None:
     rooms_dict: typing.Dict[str, typing.Dict[str, int]] = {}
     for room in rooms:
         rooms_dict[room.name] = {"id": room.id, "capacity": room.capacity}
-    st.write(rooms_dict)
+
+    bookings = get_bookings(back_address)
 
     st.write("会議室一覧")
     df_rooms = pd.DataFrame(rooms)
     st.table(df_rooms)
+
+    st.write("予約一覧")
+    df_bookings = pd.DataFrame(bookings)
+    st.table(df_bookings)
 
     with st.form(key="booking"):
         user_name: str = st.selectbox("予約者名", users_dict.keys())
@@ -127,8 +151,17 @@ def show_booking(back_address: str) -> None:
         begin_time = st.time_input("開始時刻", value=datetime.time(hour=9))
         end_time = st.time_input("終了時刻", value=datetime.time(hour=20))
 
+        submit_button = st.form_submit_button(label="送信")
+
+    if submit_button:
         user_id: int = users_dict[user_name]
         room_id: int = rooms_dict[room_name]["id"]
+        capacity: int = rooms_dict[room_name]["capacity"]
+
+        if reserved_num > capacity:
+            st.error(f"{room_name}の定員は{capacity}名です。{reserved_num}名の予約を受け付けられません。")
+            return
+
         begin_date_time = datetime.datetime(
             year=date.year,
             month=date.month,
@@ -143,9 +176,7 @@ def show_booking(back_address: str) -> None:
             hour=end_time.hour,
             minute=end_time.minute,
         ).isoformat()
-        submit_button = st.form_submit_button(label="送信")
 
-    if submit_button:
         booking = new_booking(
             back_address,
             model.booking.NewBooking(

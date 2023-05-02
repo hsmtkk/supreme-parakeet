@@ -13,6 +13,7 @@ service BookingService {
   rpc GetRooms (GetRoomsRequest) returns (GetRoomsResponse){}
   rpc NewBooking (NewBookingRequest) returns (NewBookingResponse){}
   rpc GetBooking (GetBookingRequest) returns (GetBookingResponse){}
+  rpc GetBookings (GetBookingsRequest) returns (GetBookingsResponse){}
 }
 
 message NewUser {
@@ -112,4 +113,11 @@ message GetBookingRequest {
 
 message GetBookingResponse {
   Booking booking = 1;
+}
+
+message GetBookingsRequest {
+}
+
+message GetBookingsResponse {
+  repeated Booking bookings = 1;
 }

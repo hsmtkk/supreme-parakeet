@@ -8,6 +8,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/hsmtkk/supreme-parakeet/back/model"
+	"google.golang.org/api/iterator"
 )
 
 const bookingCollection = "booking"
@@ -15,6 +16,7 @@ const bookingCollection = "booking"
 type BookingRepo interface {
 	New(context.Context, model.NewBooking) (model.Booking, error)
 	Get(context.Context, int64) (model.Booking, error)
+	List(context.Context) ([]model.Booking, error)
 }
 
 func NewBookingRepo(client *firestore.Client) BookingRepo {
@@ -50,4 +52,23 @@ func (r *bookingRepoImpl) Get(ctx context.Context, id int64) (model.Booking, err
 		return result, fmt.Errorf("failed to decode data: %w", err)
 	}
 	return result, nil
+}
+
+func (r *bookingRepoImpl) List(ctx context.Context) ([]model.Booking, error) {
+	bookings := []model.Booking{}
+	iter := r.client.Collection(bookingCollection).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+		booking := model.Booking{}
+		if err := doc.DataTo(&booking); err != nil {
+			return nil, fmt.Errorf("failed to decode data: %w", err)
+		}
+		bookings = append(bookings, booking)
+	}
+	return bookings, nil
 }
