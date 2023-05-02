@@ -17,4 +17,4 @@ services:
       PORT: 50051
       PROJECT_ID: supreme-parakeet
     volumes:
-    - supreme-parakeet-ba68c514cbcf.json:/app/supreme-parakeet-ba68c514cbcf.json:ro
+    - ./supreme-parakeet-ba68c514cbcf.json:/app/supreme-parakeet-ba68c514cbcf.json:ro
