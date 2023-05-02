@@ -5,13 +5,21 @@ import typing
 import booking_pb2
 import booking_pb2_grpc
 import grpc
+import model.booking
+import model.room
+import model.user
+import pandas as pd
 import streamlit as st
 
 
 def run() -> None:
     back_host = os.environ["BACK_HOST"]
+    if back_host == "":
+        raise Exception("BACK_HOST env var is not defined")
     back_port = os.environ["BACK_PORT"]
-    back_address = f"{back_host}:{back_port}"
+    if back_port == "":
+        raise Exception("BACK_PORT env var is not defined")
+    back_address: str = f"{back_host}:{back_port}"
 
     page: str = st.sidebar.selectbox("Choose your page", ["bookings", "users", "rooms"])
     page_map: typing.Dict = {
@@ -22,41 +30,75 @@ def run() -> None:
     page_map[page](back_address)
 
 
-def new_room(back_address: str, name: str, capacity: int) -> booking_pb2.Room:
+def new_booking(
+    back_address: str, new_item: model.booking.NewBooking
+) -> model.booking.Booking:
+    with grpc.insecure_channel(back_address) as channel:
+        stub = booking_pb2_grpc.BookingServiceStub(channel)
+        response = stub.NewBooking(
+            booking_pb2.NewBookingRequest(
+                booking=booking_pb2.NewBooking(
+                    user_id=new_item.user_id,
+                    room_id=new_item.room_id,
+                    reserved_num=new_item.reserved_num,
+                    begin_date_time=new_item.begin_date_time,
+                    end_date_time=new_item.end_date_time,
+                )
+            )
+        )
+    return model.booking.Booking(
+        id=response.id,
+        user_id=new_item.user_id,
+        room_id=new_item.room_id,
+        reserved_num=new_item.reserved_num,
+        begin_date_time=new_item.begin_date_time,
+        end_date_time=new_item.end_date_time,
+    )
+
+
+def new_room(back_address: str, new_item: model.room.NewRoom) -> model.room.Room:
     with grpc.insecure_channel(back_address) as channel:
         stub = booking_pb2_grpc.BookingServiceStub(channel)
         response = stub.NewRoom(
             booking_pb2.NewRoomRequest(
                 room=booking_pb2.NewRoom(
-                    name=name,
-                    capacity=capacity,
+                    name=new_item.name,
+                    capacity=new_item.capacity,
                 )
             )
         )
-    return response.room
+    return model.room.Room(
+        id=response.id, name=new_item.name, capacity=new_item.capacity
+    )
 
 
-def new_user(back_address: str, name: str) -> booking_pb2.User:
+def new_user(back_address: str, new_item: model.user.NewUser) -> model.user.User:
     with grpc.insecure_channel(back_address) as channel:
         stub = booking_pb2_grpc.BookingServiceStub(channel)
         response = stub.NewUser(
-            booking_pb2.NewUserRequest(user=booking_pb2.NewUser(name=name))
+            booking_pb2.NewUserRequest(user=booking_pb2.NewUser(name=new_item.name))
         )
-    return response.user
+    return model.user.User(id=response.id, name=new_item.name)
 
 
-def get_rooms(back_address: str) -> typing.List[booking_pb2.Room]:
+def get_rooms(back_address: str) -> typing.List[model.room.Room]:
     with grpc.insecure_channel(back_address) as channel:
         stub = booking_pb2_grpc.BookingServiceStub(channel)
         response = stub.GetRooms(booking_pb2.GetRoomsRequest())
-    return response.rooms
+    results = []
+    for r in response.rooms:
+        results.append(model.room.Room(id=r.id, name=r.name, capacity=r.capacity))
+    return results
 
 
-def get_users(back_address: str) -> typing.List[booking_pb2.User]:
+def get_users(back_address: str) -> typing.List[model.user.User]:
     with grpc.insecure_channel(back_address) as channel:
         stub = booking_pb2_grpc.BookingServiceStub(channel)
         response = stub.GetUsers(booking_pb2.GetUsersRequest())
-    return response.users
+    results = []
+    for u in response.users:
+        results.append(model.user.User(id=u.id, name=u.name))
+    return results
 
 
 def show_booking(back_address: str) -> None:
@@ -73,13 +115,20 @@ def show_booking(back_address: str) -> None:
         rooms_dict[room.name] = {"id": room.id, "capacity": room.capacity}
     st.write(rooms_dict)
 
+    st.write("会議室一覧")
+    df_rooms = pd.DataFrame(rooms)
+    st.table(df_rooms)
+
     with st.form(key="booking"):
-        user_id: int = 0
-        room_id: int = 0
-        reserved_num: int = st.number_input("予約人数", step=1)
+        user_name: str = st.selectbox("予約者名", users_dict.keys())
+        room_name: str = st.selectbox("会議室名", rooms_dict.keys())
+        reserved_num: int = st.number_input("予約人数", step=1, min_value=1)
         date: datetime.date = st.date_input("日付を入力", min_value=datetime.date.today())
         begin_time = st.time_input("開始時刻", value=datetime.time(hour=9))
         end_time = st.time_input("終了時刻", value=datetime.time(hour=20))
+
+        user_id: int = users_dict[user_name]
+        room_id: int = rooms_dict[room_name]["id"]
         begin_date_time = datetime.datetime(
             year=date.year,
             month=date.month,
@@ -97,20 +146,17 @@ def show_booking(back_address: str) -> None:
         submit_button = st.form_submit_button(label="送信")
 
     if submit_button:
-        with grpc.insecure_channel(back_address) as channel:
-            stub = booking_pb2_grpc.BookingServiceStub(channel)
-            response = stub.NewBooking(
-                booking_pb2.NewBookingRequest(
-                    booking=booking_pb2.NewBooking(
-                        user_id=user_id,
-                        room_id=room_id,
-                        reserved_num=reserved_num,
-                        begin_date_time=begin_date_time,
-                        end_date_time=end_date_time,
-                    )
-                )
-            )
-        st.write(response)
+        booking = new_booking(
+            back_address,
+            model.booking.NewBooking(
+                user_id=user_id,
+                room_id=room_id,
+                reserved_num=reserved_num,
+                begin_date_time=begin_date_time,
+                end_date_time=end_date_time,
+            ),
+        )
+        st.write(booking)
 
 
 def show_room(back_address: str) -> None:
@@ -122,7 +168,7 @@ def show_room(back_address: str) -> None:
         submit_button = st.form_submit_button(label="送信")
 
     if submit_button:
-        room = new_room(back_address, name, capacity)
+        room = new_room(back_address, model.room.NewRoom(name=name, capacity=capacity))
         st.write(room)
 
 
@@ -134,7 +180,7 @@ def show_user(back_address: str) -> None:
         submit_button = st.form_submit_button(label="送信")
 
     if submit_button:
-        user = new_user(back_address, name)
+        user = new_user(back_address, model.user.NewUser(name=name))
         st.write(user)
 
 

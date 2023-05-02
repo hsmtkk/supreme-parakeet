@@ -109,11 +109,17 @@ func (s *service) GetBooking(ctx context.Context, in *proto.GetBookingRequest) (
 
 func main() {
 	portStr := os.Getenv("PORT")
+	if portStr == "" {
+		log.Fatalf("PORT env var is not defined")
+	}
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		log.Fatalf("failed to parse %s as int: %v", portStr, err)
 	}
 	projectID := os.Getenv("PROJECT_ID")
+	if projectID == "" {
+		log.Fatalf("PROJECT_ID env var is not defined")
+	}
 
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)
